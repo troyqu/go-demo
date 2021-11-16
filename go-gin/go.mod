@@ -1,4 +1,4 @@
-module gogin
+module go-gin
 
 go 1.15
 
