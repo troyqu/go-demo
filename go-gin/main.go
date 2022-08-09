@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"go-gin/lb"
 )
 
 func main() {
+
+	lb.ShowGoutin()
+	fmt.Println("======分割线--------")
 	router := gin.Default()
 
 	router.LoadHTMLGlob("./*.html")
