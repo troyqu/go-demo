@@ -1,0 +1,14 @@
+dubbo:
+  metrics:
+    enable: true # default is true
+    path: /custom-metrics-path # default is /metrics
+    summary-max-age: 60000000000 # 1 minute, default is 10min
+    port: 9091 # default is 9090
+  protocols:
+    triple:
+      name: tri
+      port: 20000
+  provider:
+    services:
+      GreeterProvider:
+        interface: "" # read from pb
