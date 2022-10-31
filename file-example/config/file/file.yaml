@@ -1,0 +1,4 @@
+targetPath: /Users/qujianfei/code/smartops
+gitlab:
+  obsoleteDomain: gitlab.old.com
+  newDomain: gitlab.new.com
