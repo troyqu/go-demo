@@ -3,34 +3,67 @@ package main
 import (
 	"fmt"
 	"github/swallretu/go-demo/go-plugin/ext"
-	"net/http"
 	"os"
 	"plugin"
 	"strings"
 )
 
-var PluginRegistry = make(map[string]*ext.Speak)
+var PluginRegistry = make(map[string] *ext.Speak)
 
-func RegisterPlugin(name string, pluginPath string) {
+func RegisterPluginFunc(name string, pluginPath string) {
 	p, err := plugin.Open(pluginPath)
 	if err != nil {
 		fmt.Printf("Error opening plugin %s: %s\n", name, err)
 		return
 	}
 
+
+	//使用方法来作为查找插件的符号
 	sym, err := p.Lookup("NewPlugin")
 	if err != nil {
 		fmt.Printf("Error looking up NewPlugin in %s: %s\n", name, err)
 		return
 	}
 
-	newPlugin, ok := sym.(func() *ext.Speak)
+	newPlugin, ok := sym.(func() ext.Speak)
 	if !ok {
 		fmt.Printf("Error converting NewPlugin to func() ext.Speak in %s\n", name)
 		return
 	}
 
-	PluginRegistry[name] = newPlugin()
+	pluginInstance := newPlugin()
+	PluginRegistry[name] = &pluginInstance
+
+	fmt.Printf("Registered plugin: %s\n", name)
+}
+
+func RegisterPluginVariable(name string, pluginPath string) {
+	p, err := plugin.Open(pluginPath)
+	if err != nil {
+		fmt.Printf("Error opening plugin %s: %s\n", name, err)
+		return
+	}
+
+	//使用变量来作为查找插件的符号
+	sym, err := p.Lookup("Speak")
+	if err != nil {
+		fmt.Printf("Error looking up NewPlugin in %s: %s\n", name, err)
+		return
+	}
+
+	var speak ext.Speak
+	speak, ok := sym.(ext.Speak)
+	if !ok {
+		fmt.Println("unexpected type from module symbol")
+		os.Exit(1)
+	}
+
+	// 4. use the module
+	//speak.Say("hello")
+
+	PluginRegistry[name] = &speak
+
+	fmt.Printf("Registered plugin: %s\n", name)
 }
 
 func main() {
@@ -45,21 +78,24 @@ func main() {
 	// 动态加载插件
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), ".so") {
-			RegisterPlugin(strings.TrimSuffix(file.Name(), ".so"), fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
+			fmt.Println(strings.TrimSuffix(file.Name(), ".so"))
+			fmt.Printf(fmt.Sprintf("%s/%s \n", pluginsDir, file.Name()))
+			//RegisterPluginVariable(strings.TrimSuffix(file.Name(), ".so"), fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
+			RegisterPluginFunc(strings.TrimSuffix(file.Name(), ".so"), fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
 		}
 	}
 
-	// 启动 HTTP 服务
-	http.HandleFunc("/call/plugin", handlePlugin)
-	http.ListenAndServe(":8080", nil)
+	handlePlugin()
 }
 
-func handlePlugin(w http.ResponseWriter, r *http.Request) {
-	pluginType := r.URL.Query().Get("type")
+func handlePlugin() {
+	fmt.Printf("using plugins...\n")
+	plugins := []string{"ch_speak", "en_speak"}
 
-	handler := (ext.Speak)(*PluginRegistry[pluginType])
+	for _, pluginType := range plugins {
+		handler := (ext.Speak)(*PluginRegistry[pluginType])
+		handler.Say(pluginType)
+	}
 
-	handler.Say(pluginType)
-
-	w.Write([]byte(fmt.Sprintf("Running plugin: %s", pluginType)))
+	fmt.Printf("process plugins finished\n")
 }
