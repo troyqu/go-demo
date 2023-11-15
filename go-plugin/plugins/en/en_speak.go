@@ -3,12 +3,16 @@ package main
 import (
 	"fmt"
 	"github/swallretu/go-demo/go-plugin/ext"
+	"github/swallretu/go-demo/go-plugin/pkg/database"
 )
 
 type EnSpeak struct{}
 
 func (p EnSpeak) Say(msg string) {
-	fmt.Printf("Running Plugin EnSpeak msg=%s \n", msg)
+
+	mockparam := "en"
+	result := database.MockDBOperator(mockparam)
+	fmt.Printf("Running Plugin EnSpeak msg=%s result=%s\n", msg, result)
 }
 
 //使用变量导出插件包，配合使用变量来作为查找插件的符号

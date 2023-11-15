@@ -11,6 +11,9 @@
 │   └── ext.go
 ├── go.mod
 ├── main.go
+├── pkg
+│   └── database
+│       └── mysql.go
 └── plugins
     ├── ch
     │   └── ch_speak.go
@@ -19,7 +22,7 @@
     │   └── en_speak.go
     └── en_speak.so
 
-4 directories, 8 files
+6 directories, 9 files
 ➜  go-plugin git:(main) ✗ 
 
 ```
@@ -27,6 +30,7 @@
 ## 目录解释
 - ext：定义统一插件接口，这里主要定义一个Say(msg string)作为演示
 - plugins：对于插件的实现，不同目录存放各自的实现
+- pkg/database：模拟插件中调用外部代码
 - main.go：程序启动入口
 
 ## 代码描述
@@ -90,11 +94,12 @@ en_speak
 ./plugins/en_speak.so 
 Registered plugin: en_speak
 using plugins...
-Running Plugin ChSpeak msg=ch_speak 
-Running Plugin EnSpeak msg=en_speak 
+Running Plugin ChSpeak msg=ch_speak result=chresult
+Running Plugin EnSpeak msg=en_speak result=enresult
 process plugins finished
 
 Process finished with exit code 0
+
 
 ```
 
